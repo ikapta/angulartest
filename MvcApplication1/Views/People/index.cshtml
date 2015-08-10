@@ -1,0 +1,159 @@
+﻿@model MvcApplication1.ViewModels.PeopleView
+
+@{
+    ViewBag.Title = "index";
+}
+
+<!-- index.html -->
+
+
+<head>
+    <title>Angular Forms</title>
+
+    <!-- LOAD BOOTSTRAP CSS -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+
+    <!-- LOAD JQUERY -->
+    <!-- when building an angular app, you generally DO NOT want to use jquery -->
+    <!-- we are breaking this rule here because jQuery's $.param will help us send data to our PHP script so that PHP can recognize it -->
+    <!-- this is jQuery's only use. avoid it in Angular apps and if anyone has tips on how to send data to a PHP script w/o jQuery, please state it in the comments -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.0/angular.min.js"></script>
+    <!-- PROCESS FORM WITH AJAX (OLD) -->
+    <script>
+
+    
+    </script>
+    <style type="text/css">
+        input.ng-invalid.ng-dirty {
+            background-color: yellow;
+        }
+    </style>
+</head>
+<body ng-app="formApp" ng-controller="formController">
+    <div class="container">
+        <div class="col-md-6 col-md-offset-3">
+
+           
+            <div class="page-header">
+                <h1><span class="glyphicon glyphicon-tower"></span> Submitting Forms with Angular</h1>
+            </div>
+
+      
+
+            <div id="messages" ng-show="message">{{ message }}</div>
+
+            @*表单验证 http://www.cnblogs.com/woshinidezhu/p/form-validation-with-angularjs.html*@
+
+            w5cValidator 扩展插件的出现
+            Github上的源码地址为：https://github.com/why520crazy/w5c-validator-angular
+            http://blog.ngnice.com/angular-w5c-validator/example/index.html
+
+            @*<form ng-submit="processForm()">*@
+            <form id="myform" name="formName" novalidate>
+
+                <input type="email" ng-model="user.email" ng-minlength="5" ng-maxlength="20" ng-pattern="/m.*/" required />
+                <input type="email" ng-model="user.email2" required />
+
+                <div class="form-group">
+                    <label>id</label>
+                    <input ng-model="formData.PId" required ng-minlength="6" type="text" name="PId" class="form-control" placeholder="Bruce Wayne">
+                    <field-error for="formName.PId">you error message here</field-error>
+                    <span style="color: red" ng-show="formName.PId.$dirty && formName.PId.$invalid">
+                        <span ng-show="formName.PId.$error.required">Username is required.</span>
+                    </span>
+                </div>
+
+
+                <div class="form-group">
+                    <label>name</label>
+                    <input ng-model="formData.PName" ng-class="{ 'has-error' : errorName }" type="text" name="PName" class="form-control" placeholder="Caped Crusader">
+                    <span class="help-block" ng-show="errorName">{{ errorName }}</span>
+                </div>
+
+
+                <div class="form-group">
+                    <label>age</label>
+                    <input ng-model="formData.PAge" type="text" name="PAge" class="form-control" placeholder="Caped Crusader">
+                    <span class="help-block"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>address</label>
+                    <input ng-model="formData.PAddress" type="text" name="PAddress" class="form-control" placeholder="Caped Crusader">
+                    <span class="help-block"></span>
+                </div>
+
+
+                <button class="btn btn-success btn-lg btn-block" ng-click="processForm()">
+                    <span class="glyphicon glyphicon-flash"></span> Submit!
+                </button>
+            </form>
+
+                <pre>
+                 {{ formData }}
+            </pre>
+
+                <script>
+                    //$(function() {
+                    //    $('button').click(function () {
+
+                    //        $.ajax({
+                    //            url: "/people/Index",
+                    //            type: "post",
+
+                    //            data:$('#myform').serialize(),
+                    //            success:function() {
+                    //                Console.log(1);
+                    //            }
+
+                    //    });
+                    //    });
+                    //})
+
+
+                    // define angular module/app
+                    var formApp = angular.module('formApp', []);
+
+                    // create angular controller and pass in $scope and $http
+                    formApp.controller("formController", function ($scope, $http) {
+                        $scope.FormData = {};
+
+
+
+                        $scope.processForm = function () {
+
+                            //$http.post('process.php', $scope.formData)
+                            //        .success(function(data) {
+
+                            //        });
+
+                            $http({
+                                method: 'POST',
+                                url: '/people/Index',
+                                data: $.param($scope.formData),  // pass in data as strings
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }  // set the headers so angular passing info as form data (not request payload)
+                            })
+                            .success(function (data) {
+                                console.log(data);
+
+                                if (data.success) {
+                                    // if not successful, bind errors to error variables
+                                    $scope.errorName = data.errors.name;
+                                    $scope.errorSuperhero = data.errors.superheroAlias;
+                                } else {
+                                    // if successful, bind success message to message
+                                    $scope.message = data.message;
+                                }
+                            });
+                        };
+                    });
+
+
+                </script>
+</div>
+    </div>
+</body>
+
+
+
